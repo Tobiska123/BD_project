@@ -79,10 +79,29 @@ public class ModelDB{
         return rSetToStr(resultSet);
     }
 
-    private String reprInsert(Vector<String> vector){
+    private String reprInsertValue(Vector<String> vector, String tableName)throws SQLException{
+        ResultSet typesTable = this.connection.getMetaData().getColumns(null, this.connection.getMetaData().getUserName(), tableName, "%");
+        typesTable.next();
         StringBuilder temp = new StringBuilder("(");
         String prefix = "";
-        for(String iter_vector : vector) {
+        for(String iter_vector : vector){
+            temp.append(prefix);
+            prefix = ", ";
+            String type = typesTable.getString(6);
+            if(type.equals("NUMBER"))
+                temp.append(iter_vector);
+            if(type.equals("VARCHAR2") || type.equals("VARCHAR"))
+                temp.append("'" + iter_vector + "'");
+            typesTable.next();
+        }
+        temp.append(")");
+        return new String(temp);
+    }
+
+    private String reprInsertCols(Vector<String> vector){
+        StringBuilder temp = new StringBuilder("(");
+        String prefix = "";
+        for(String iter_vector : vector){
             temp.append(prefix);
             prefix = ", ";
             temp.append(iter_vector);
@@ -93,7 +112,7 @@ public class ModelDB{
     
     public Pair<Vector<Vector<String>>, Vector<String>> addDataToTable(String tableName, Vector<String> insertingDataIntoCurTable, Vector<String> headersCurTable)throws SQLException{
         if(!this.lastQueryIsExistTable) throw new SQLException("is the Select Query");
-        String query = "INSERT INTO " + tableName + reprInsert(headersCurTable) + " VALUES " + reprInsert(insertingDataIntoCurTable);
+        String query = "INSERT INTO " + tableName + reprInsertCols(headersCurTable) + " VALUES " + reprInsertValue(insertingDataIntoCurTable, tableName);
         Statement statement = this.connection.createStatement();
         statement.executeUpdate(query);
         return getDataOfSelectTable(tableName);
