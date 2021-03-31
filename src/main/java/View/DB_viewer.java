@@ -28,8 +28,7 @@ public class DB_viewer extends JFrame{
         }
         this.setPreferredSize(new Dimension(400,500));
         Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setLocation((int)((size.getWidth() - size.width/4) / 2), (int)((size.getHeight() - size.height / 2) / 2));
-        this.setLocationRelativeTo(null);
+        this.setLocation((int)((size.getWidth() - size.width/4) / 2), (int)((size.getHeight() - size.height / 2) / 2));//BLEAT GOVNO
         this.loginUI = new LoginUI();
         this.add(this.loginUI);
         addListenersLoginUI();
