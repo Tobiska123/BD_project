@@ -17,9 +17,9 @@ import java.awt.event.ActionListener;
         JTextField userTextField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
 
-        JButton loginButton = new JButton("LOGIN");
-        JButton resetButton = new JButton("RESET");
-        JCheckBox showPassword = new JCheckBox("Show Password");
+        JButton loginButton = new JButton("Авторизация");
+        JButton resetButton = new JButton("Сброс");
+        JCheckBox showPassword = new JCheckBox("Показать пароль");
         JLabel stat_label = new JLabel();
 
 
@@ -39,8 +39,8 @@ import java.awt.event.ActionListener;
         LoginUI()
         {
             this.urlTextField.setText("jdbc:oracle:thin:@84.237.50.81:1521:xe");
-            this.userTextField.setText("HR");
-            this.passwordField.setText("hr");
+            this.userTextField.setText("18209_Levchenko");
+            this.passwordField.setText("1111");
             this.setSize(400,700);
             this.setVisible(true);
             setLayoutManager();

@@ -26,5 +26,4 @@ public class CurrentTable extends JTable {
     public void setSelectionRow(int index){
         this.setRowSelectionInterval(index, index);
     }
-
 }

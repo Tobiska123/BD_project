@@ -2,13 +2,17 @@ package View;
 
 import Controller.ControllerDB;
 import Model.Pair;
+import View.dataBaseUI.BLOCK_BUTTON_FLAGS;
+import View.dataBaseUI.CurrentQueryList;
 import View.dataBaseUI.DataBaseUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.*;
 import java.util.List;
-import java.util.Vector;
 
 public class DB_viewer extends JFrame{
 
@@ -16,6 +20,8 @@ public class DB_viewer extends JFrame{
 
     private LoginUI loginUI;
     private MainUI mainUI;
+
+    private Map<String, Vector<String>> queries;
 
     private DataBaseUI dataBaseUI;
 
@@ -95,12 +101,11 @@ public class DB_viewer extends JFrame{
         this.mainUI.getEditBtn().addActionListener(e -> {
             try{
                 this.getContentPane().removeAll();
-                this.setMinimumSize(new Dimension(800,600));
+                this.setMinimumSize(new Dimension(1000,600));
                 this.dataBaseUI = new DataBaseUI();
                 this.controllerDB.editButtonAction();
                 this.getContentPane().add(this.dataBaseUI.getRootPanel());
                 this.setVisible(true);
-
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -119,6 +124,11 @@ public class DB_viewer extends JFrame{
         });
     }
 
+    public void setQueries(Map<String, Vector<String>> queries){
+        this.queries = queries;
+        this.dataBaseUI.getQUERIESlist().setQueryList(queries.keySet());
+    }
+
     public void addListenerControlPane(){
         this.dataBaseUI.getTableSelect().addActionListener(e -> {
             try {
@@ -126,7 +136,7 @@ public class DB_viewer extends JFrame{
                 String selectTable = (String) is.getSelectedItem();
                 Pair<Vector<Vector<String>>, Vector<String>> tmp = this.controllerDB.selectTableData(selectTable);
                 dataBaseUI.getCursorDB().setHeaderAndData(tmp.getFirst(), tmp.getSecond());
-                this.dataBaseUI.blockedManipulatedButton(true);
+                this.dataBaseUI.blockedManipulatedButton(BLOCK_BUTTON_FLAGS.ALL_BUTTON_BLOCK, true);
                 dataBaseUI.setStatusActionLabel("Success load table: " + selectTable);
             }catch (Exception ex){
                 dataBaseUI.setStatusActionLabel(ex.getMessage());
@@ -155,6 +165,36 @@ public class DB_viewer extends JFrame{
             }
         });
 
+        this.dataBaseUI.getQUERIESlist().addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                 dataBaseUI.getFormPanel().setForm(queries.get(dataBaseUI.getQUERIESlist().getSelectedValue()));
+                 dataBaseUI.blockedManipulatedButton(BLOCK_BUTTON_FLAGS.ALL_BUTTON_BLOCK, false);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
+
+
         this.dataBaseUI.getUPDATEButton().addActionListener(e -> {
             try{
                 Pair<Vector<Vector<String>>, Vector<String>> tmp = this.controllerDB.updateModel(this.dataBaseUI.getSelectionCombox(),
@@ -170,7 +210,7 @@ public class DB_viewer extends JFrame{
             try{
                 Pair<Vector<Vector<String>>, Vector<String>> tmp = this.controllerDB.someQuery(this.dataBaseUI.getSomeQueryField().getText());
                 this.dataBaseUI.getCursorDB().setHeaderAndData(tmp.getFirst(), tmp.getSecond());
-                this.dataBaseUI.blockedManipulatedButton(false);
+                this.dataBaseUI.blockedManipulatedButton(BLOCK_BUTTON_FLAGS.PART_BUTTON_BLOCK, false);
                 dataBaseUI.setStatusActionLabel("Success has executed your query");
             }catch (Exception ex){
                 dataBaseUI.setStatusActionLabel(ex.getMessage());
@@ -185,6 +225,22 @@ public class DB_viewer extends JFrame{
                     dataBaseUI.setStatusActionLabel("Connection is valid");
             }catch (Exception ex){
                 dataBaseUI.setStatusActionLabel(ex.getMessage());
+            }
+        });
+
+        this.dataBaseUI.getGoButton().addActionListener(e -> {
+            CurrentQueryList tmpList = this.dataBaseUI.getQUERIESlist();
+            if(!tmpList.isSelectionEmpty()){
+                try {
+                    String queryName = (String) tmpList.getSelectedValue();
+                    Map<String, String> queryParams = this.dataBaseUI.getFormPanel().getMap();
+                    Pair<String, Map<String, String>> query = new Pair<>(queryName, queryParams);
+                    Pair<Vector<Vector<String>>, Vector<String>> resultQuery = this.controllerDB.userRequestExec(query);
+                    this.dataBaseUI.getCursorDB().setHeaderAndData(resultQuery.getFirst(), resultQuery.getSecond());
+                    this.dataBaseUI.blockedManipulatedButton(BLOCK_BUTTON_FLAGS.PART_BUTTON_BLOCK, true);//BlockedGoButton!!!!
+                }catch (Exception ex){
+                    dataBaseUI.setStatusActionLabel(ex.getMessage());
+                }
             }
         });
 

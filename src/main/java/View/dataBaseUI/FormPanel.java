@@ -49,8 +49,16 @@ public class FormPanel extends JPanel {
     }
     public Vector<String> getValues(){
         Vector<String> resultValues = new Vector<>();
-        for(JTextField iter_field: this.formForCurTable.values())
+        for(JTextField iter_field: this.formForCurTable.values())//FIX!!!
             resultValues.add(iter_field.getText());
         return resultValues;
+    }
+
+    public Map<String, String> getMap(){
+        Map<String, String> jCompToStrMap = new LinkedHashMap<>();
+        for(Map.Entry<JLabel, JTextField> iter: this.formForCurTable.entrySet()){
+            jCompToStrMap.put(iter.getKey().getText(), iter.getValue().getText());
+        }
+        return jCompToStrMap;
     }
 }

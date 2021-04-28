@@ -2,11 +2,8 @@ package View.dataBaseUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.HashMap;
 
-public class DataBaseUI {
+public class DataBaseUI{
     private JPanel rootPanel;
     private JComboBox tableSelect;
 
@@ -14,10 +11,22 @@ public class DataBaseUI {
         return someQueryField;
     }
 
-    public void blockedManipulatedButton(boolean flag){
-        ADDButton.setEnabled(flag);
-        UPDATEButton.setEnabled(flag);
-        DELETEButton.setEnabled(flag);
+    public void blockedManipulatedButton(BLOCK_BUTTON_FLAGS block_button_flags, boolean flag){
+        if(block_button_flags == BLOCK_BUTTON_FLAGS.PART_BUTTON_BLOCK){
+            ADDButton.setEnabled(flag);
+            UPDATEButton.setEnabled(flag);
+            DELETEButton.setEnabled(flag);
+        }else if(block_button_flags == BLOCK_BUTTON_FLAGS.ALL_BUTTON_BLOCK){
+            ADDButton.setEnabled(flag);
+            UPDATEButton.setEnabled(flag);
+            DELETEButton.setEnabled(flag);
+            NEXTButton.setEnabled(flag);
+            PREVButton.setEnabled(flag);
+        }
+        }
+
+    public JButton getGoButton() {
+        return goButton;
     }
 
     private JTextField someQueryField;
@@ -47,6 +56,14 @@ public class DataBaseUI {
     private JScrollPane JPanel;
     private JLabel exceptionLabel;
     private JScrollPane formScrollPanel;
+    private JButton LogOut;
+    private CurrentQueryList QUERIESlist;
+    private JButton QUERIESButton;
+    private CursorTable cursorDB;
+
+    public CurrentQueryList getQUERIESlist(){
+        return this.QUERIESlist;
+    }
 
     public FormPanel getFormTablePanel() {
         return formTablePanel;
@@ -71,13 +88,15 @@ public class DataBaseUI {
     }
 
     private JButton REFRESHButton;
+    private JButton goButton;
 
     public JButton getLogOut() {
         return LogOut;
     }
 
-    private JButton LogOut;
-    private CursorTable cursorDB;
+    public JButton getQUERIESButton(){
+        return this.QUERIESButton;
+    }
 
     public DataBaseUI(){
         setListeners();
@@ -107,7 +126,12 @@ public class DataBaseUI {
         this.formTablePanel = new FormPanel();
         this.currentTable = new CurrentTable();
         cursorDB = new CursorTable(this.currentTable, this.formTablePanel);
+        this.QUERIESlist = new CurrentQueryList();
         this.formTablePanel.setLayout(new GridBagLayout());
+    }
+
+    public FormPanel getFormPanel(){
+        return this.formTablePanel;
     }
 
     public void setListeners(){

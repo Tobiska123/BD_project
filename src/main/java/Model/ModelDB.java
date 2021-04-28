@@ -1,26 +1,23 @@
 package Model;
 
 import Controller.ControllerDB;
+import Model.Queries.AbstractQuery;
+import Model.Queries.ReadersCharachterQuery;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Vector;
-import java.util.Vector;
+import java.util.*;
 
 public class ModelDB{
-
     private ControllerDB controllerDB;
 
-    private String username = "HR";
-    private String password = "hr";
+    private String username = "18209_Levchenko";
+    private String password = "1111";
     private String url = "jdbc:oracle:thin:@84.237.50.81:1521:xe";
     private DbConnectionHandler dbConnectionHandler;
-
     private Pair<Vector<Vector<String>>, Vector<String>> resultLastQuery;
     private boolean lastQueryIsExistTable = false;
-
     private Connection connection;
-
+    private List<AbstractQuery> listOfQueries;
 
     public void setUsername(String username) {
         this.username = username;
@@ -34,12 +31,27 @@ public class ModelDB{
         this.url = url;
     }
 
-
     public ModelDB(ControllerDB controllerDB){
         this.controllerDB = controllerDB;
+        this.listOfQueries = new LinkedList<>();
+        this.listOfQueries.add(new ReadersCharachterQuery());
     }
 
+    public AbstractQuery findQuery(String nameQuery){
+        for(AbstractQuery iter_query: listOfQueries){
+            if(iter_query.getNameQuery().equals(nameQuery))
+                return iter_query;
+        }
+        return null;
+    }
 
+    public Map<String, Vector<String>> getQueries(){
+        Map<String, Vector<String>> tmpMap = new HashMap<>();
+        for(AbstractQuery iter_query: listOfQueries){
+            tmpMap.put(iter_query.getNameQuery(), iter_query.getParamsName());
+        }
+        return tmpMap;
+    }
 
     public void makeConnectionDB() throws SQLException{
         DbConnectionHandler dbConnectionHandler = new DbConnectionHandler(this.url,
@@ -48,17 +60,22 @@ public class ModelDB{
     }
 
     public boolean refreshConnectionDB() throws SQLException{
-        if(!this.connection.isValid(2)) {
+        if(!this.connection.isValid(2)){
             this.connection = dbConnectionHandler.getNewConnection();
             return true;
         }
         return false;
     }
 
+    public Pair<Vector<Vector<String>>, Vector<String>> execUserQuery(Pair<String, Map<String, String>> query)throws SQLException{
+        AbstractQuery selectedQuery = findQuery(query.getFirst());
+        selectedQuery.setParams(query.getSecond());
+        return executeSomeQuery(selectedQuery.generateQuery());
+    }
+
     public void loginOut()throws SQLException{
         this.connection.close();
     }
-
 
     public Vector<String> getTables() throws SQLException{
         DatabaseMetaData metaData = this.connection.getMetaData();
@@ -140,13 +157,14 @@ public class ModelDB{
         ResultSet typesTable = this.connection.getMetaData().getColumns(null, this.connection.getMetaData().getUserName(), tableName, "%");
         typesTable.next();
         StringBuilder tempCond = new StringBuilder();
-        String prefix = "";
+        String type, prefix = "";
         for(String iter_field: fieldsCond){
             tempCond.append(prefix);
             prefix = ", ";
-            if(typesTable.getString(6).equals("NUMBER"))
+            type = typesTable.getString(6);
+            if(type.equals("NUMBER") || type.equals("CHAR"))//Унифицировать представление типов данных
                 tempCond.append(iter_field + "=" + tableData.elementAt(headers.indexOf(iter_field)));
-            if(typesTable.getString(6).equals("VARCHAR2") || typesTable.getString(6).equals("VARCHAR"))
+            if(type.contains("VARCHAR"))
                 tempCond.append(iter_field + "=" + "'" + tableData.elementAt(headers.indexOf(iter_field)) + "'");
             typesTable.next();
         }

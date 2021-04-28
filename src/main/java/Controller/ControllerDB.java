@@ -2,10 +2,13 @@ package Controller;
 
 import Model.ModelDB;
 import Model.Pair;
+import Model.Queries.AbstractQuery;
 import View.DB_viewer;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 public class ControllerDB {
@@ -35,16 +38,21 @@ public class ControllerDB {
             this.model.makeConnectionDB();
     }
 
+    public Pair<Vector<Vector<String>>, Vector<String>> userRequestExec(Pair<String, Map<String, String>> query)throws SQLException{
+         return this.model.execUserQuery(query);
+    }
+
     public void editButtonAction()throws SQLException{
         List<String> listOfTables = this.model.getTables();
+        Map<String, Vector<String>> queries = this.model.getQueries();
         this.viewer.setSelectableTables(listOfTables);
+        this.viewer.setQueries(queries);
         this.viewer.addListenerControlPane();
     }
 
     public Pair<Vector<Vector<String>>, Vector<String>> selectTableData(String tableData)throws SQLException{
             return this.model.getDataOfSelectTable(tableData);
     }
-
 
     public Pair<Vector<Vector<String>>, Vector<String>> addRowToModel(String tableName, Vector<String> headers, Vector<String> curRowData)throws SQLException{
         return this.model.addDataToTable(tableName, headers, curRowData);
